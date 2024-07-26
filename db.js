@@ -12,7 +12,7 @@ if (!cached) {
   };
 }
 
-const connect = async () => {
+export const connect = async () => {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
@@ -27,4 +27,3 @@ const connect = async () => {
   return cached.conn;
 };
 
-module.exports = connect;
