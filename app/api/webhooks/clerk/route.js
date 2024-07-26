@@ -1,16 +1,12 @@
-import { clerkClient } from "@clerk/nextjs/server";
-
-
-import {createUser} from "../../../../lib/actions/user.action";
-
-
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { WebhookEvent } from '@clerk/nextjs/server'
-import { NextResponse } from "next/server";
+import { clerkClient, WebhookEvent } from '@clerk/nextjs/server'
+import { createUser } from '@/actions/user.action'
+import { NextResponse } from 'next/server'
 
 export async function POST(req) {
 
+  // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
 
   if (!WEBHOOK_SECRET) {
@@ -45,7 +41,7 @@ export async function POST(req) {
       "svix-id": svix_id,
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
-    }) 
+    })
   } catch (err) {
     console.error('Error verifying webhook:', err);
     return new Response('Error occured', {
@@ -59,38 +55,33 @@ export async function POST(req) {
   const eventType = evt.type;
 
   if(eventType==="user.created"){
-    const {id,email_addresses,image_url,first_name,last_name,username,phone_numbers}=evt.data;
-
+    const {id,email_addresses,image_url,first_name,last_name,phone_numbers}=evt.data;
     const user={
-      clerkId:id,
-      email:email_addresses[0].email_addresses,
-      username:username,
-      first_name:first_name,
-      last_name:last_name,
-      photo:image_url,
-      phoneno:phone_numbers[0]
+        clerkId:id,
+        email:email_addresses[0].email_address,
+        photo:image_url,
+        first_name:first_name,
+        last_name:last_name,
+        phone_no:phone_numbers[0]
     }
+
     console.log(user);
 
     const newUser=await createUser(user);
 
     if(newUser){
-      await clerkClient.users.updateUserMetadata(id,{
-        publicMetadata:{
-          userId:newUser._id
-        }
-      })
+        await clerkClient.users.updateUserMetadata(id,{
+            publicMetadata:{
+                userId:newUser._id
+            }
+        })
     }
-
-    return NextResponse.json({message:"New user created",user:newUser});
+    return NextResponse.json({message:"New User created",user:newUser});
 
   }
-
 
   console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
   console.log('Webhook body:', body)
 
   return new Response('', { status: 200 })
-  
-
 }
