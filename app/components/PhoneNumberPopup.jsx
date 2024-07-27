@@ -117,7 +117,8 @@ export default function PhoneNumberPopup({ onSubmit }) {
           </>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex items-center">
+          <p className="text-xs text-gray-500">Enter your phone number to receive a 4-digit OTP via SMS.</p>            
+          <div className="flex items-center">
               <select
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value)}
@@ -133,7 +134,7 @@ export default function PhoneNumberPopup({ onSubmit }) {
                 value={phoneNo}
                 onChange={(e) => setPhoneNo(e.target.value)}
                 placeholder="Enter phone number"
-                className="border border-gray-300 rounded-r w-full p-2"
+                className="border border-gray-300 rounded-l w-full p-2"
                 required
               />
             </div>

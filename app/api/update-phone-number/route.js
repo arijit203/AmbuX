@@ -2,6 +2,9 @@
 
 import { MongoClient } from 'mongodb';
 import { NextResponse } from 'next/server';
+import User from "../modals/user.modal";
+import { connect } from "../db";
+
 import axios from 'axios';
 
 const uri = process.env.MONGODB_URL; // Your MongoDB URI
@@ -16,12 +19,12 @@ export async function POST(req) {
   }
 
   try {
-    await client.connect();
+    await connect();
     const database = client.db('ambulance');
     const users = database.collection('users'); // Ensure this is the correct collection name
 
     // Update phone number in MongoDB
-    const result = await users.updateOne(
+    const result = await User.updateOne(
       { clerkId: userId },
       { $set: { phone_no: phoneNo } }
     );
@@ -44,7 +47,7 @@ export async function POST(req) {
           },
         }
       );
-      console.log("ClerkResponse: ",clerkResponse)
+      // console.log("ClerkResponse: ",clerkResponse)
       if (clerkResponse.status === 200) {
         console.log("Done in Both");
         return NextResponse.json({ message: 'Phone number updated successfully in both databases' }, { status: 200 });
