@@ -2,8 +2,8 @@
 
 import { MongoClient } from 'mongodb';
 import { NextResponse } from 'next/server';
-import User from "../modals/user.modal";
-import { connect } from "../db";
+import User from "../../../modals/user.modal";
+import { connect } from "../../../db";
 
 import axios from 'axios';
 
