@@ -63,6 +63,7 @@ function InputItem({ type = 'source' }) {
 
       geocoder.geocode({ location: latLng }, (results, status) => {
         if (status === 'OK' && results[0]) {
+          console.log(results[0])
           const location = {
             value: {
               place_id: 'current-location',
@@ -85,6 +86,7 @@ function InputItem({ type = 'source' }) {
     });
   };
 
+ 
   return (
     <div className="bg-slate-200 p-3 rounded-lg mt-3 flex flex-col gap-4">
       <div className="flex items-center gap-4">
