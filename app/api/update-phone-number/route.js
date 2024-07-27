@@ -1,10 +1,5 @@
-// app/api/update-phone-number/route.js
-
 import { MongoClient } from 'mongodb';
 import { NextResponse } from 'next/server';
-import User from "../../../modals/user.modal";
-import { connect } from "../../../db";
-
 import axios from 'axios';
 
 const uri = process.env.MONGODB_URL; // Your MongoDB URI
@@ -19,14 +14,15 @@ export async function POST(req) {
   }
 
   try {
-    await connect();
+    await client.connect();
     const database = client.db('ambulance');
     const users = database.collection('users'); // Ensure this is the correct collection name
 
     // Update phone number in MongoDB
-    const result = await User.updateOne(
+    const result = await users.updateOne(
       { clerkId: userId },
-      { $set: { phone_no: phoneNo } }
+      { $set: { phone_no: phoneNo } },
+      { writeConcern: { w: 'majority' } } // Ensure correct write concern
     );
 
     if (result.modifiedCount === 1) {
@@ -34,7 +30,7 @@ export async function POST(req) {
       const clerkResponse = await axios.post(
         `https://api.clerk.dev/v1/phone_numbers`,
         {
-          "user_id":userId,
+          "user_id": userId,
           "phone_number": phoneNo,
           "verified": true,
           "primary": true,
@@ -47,7 +43,7 @@ export async function POST(req) {
           },
         }
       );
-      // console.log("ClerkResponse: ",clerkResponse)
+      console.log("ClerkResponse: ", clerkResponse)
       if (clerkResponse.status === 200) {
         console.log("Done in Both");
         return NextResponse.json({ message: 'Phone number updated successfully in both databases' }, { status: 200 });
@@ -61,7 +57,6 @@ export async function POST(req) {
     console.error('Error updating phone number:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   } finally {
-    // MongoDB connections in serverless functions are typically managed automatically
-    // Consider leaving the connection open or using a connection pool
+    await client.close(); // Close the MongoDB connection
   }
 }
