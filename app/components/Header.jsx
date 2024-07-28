@@ -19,7 +19,7 @@ function Header() {
           <div className='flex gap-6 items-center'>
             {headerMenu.map((item) => (
               <div key={item.id} className='flex gap-2 items-center'> {/* Use item.id as the key */}
-                <Image src={item.icon} width={25} height={25} alt={item.name} />
+                <Image src="/ambulance4.png" width={25} height={25} alt={item.name} />
                 <h2>{item.name}</h2>
               </div>
             ))}

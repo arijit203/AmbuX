@@ -61,8 +61,8 @@ export async function POST(req) {
       clerkId: id,
       email: email_addresses[0].email_address,
       photo: image_url,
-      first_name: first_name,
-      last_name: last_name,
+      firstName: first_name,
+      lastName: last_name,
       phone_no: phone_numbers[0]?.phone_number || null // Ensure the phone number is correctly accessed
     };
 
