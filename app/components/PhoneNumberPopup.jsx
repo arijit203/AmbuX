@@ -54,6 +54,7 @@ export default function PhoneNumberPopup({ onSubmit }) {
       const fullPhoneNumber = `${countryCode}${phoneNo}`;
       onSubmit(fullPhoneNumber);
       toast.success('OTP verified successfully!');
+      window.location.reload();
     } else {
       setError('Incorrect OTP. Please try again.');
     }

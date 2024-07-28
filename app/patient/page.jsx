@@ -21,7 +21,7 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.replace('/');
+      router.replace('/sign-in');
     }
 
     const fetchUserData = async () => {
