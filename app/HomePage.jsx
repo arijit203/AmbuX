@@ -15,7 +15,12 @@ export default function HomePage() {
   const router = useRouter();
 
   const handleRoleClick = (role) => {
-    router.push(`/sign-in?role=${role}`);
+    if(role=='patient'){
+      router.push("/patient")
+    }
+    else{
+      router.push("/driver");
+    }
   };
 
   return (

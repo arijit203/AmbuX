@@ -21,7 +21,7 @@ export default function Home() {
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.replace('/sign-in?role=patient');
+      router.replace('/');
     }
 
     const fetchUserData = async () => {
