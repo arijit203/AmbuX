@@ -27,7 +27,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "app/sign-in/[[...sign-in]]/page.js", "app/sign-up/[[...sign-up]]/page.js"  ],
+, "app/sign-in/[[...sign-in]]/page.js", "app/sign-up/[[...sign-up]]/page.js", "app/api/webhooks/clerk/route.js"  ],
   "exclude": [
     "node_modules"
   ]

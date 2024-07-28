@@ -25,7 +25,7 @@ function Header() {
             ))}
           </div>
         </div>
-        <UserButton afterSignOutUrl='/sign-in' />
+        <UserButton afterSignOutUrl='/' />
       </div>
     </div>
   );
