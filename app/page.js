@@ -37,26 +37,21 @@ import { useAuth } from '@clerk/nextjs';
 import { useEffect } from 'react';
 
 import HomePage from './HomePage';
-import { useRole } from './context/RoleContext';
+
 
 
 export default function Page() {
  
   const router = useRouter();
   const { isSignedIn } = useAuth();
-  const { role } = useRole();
-
+  
   useEffect(() => {
-    if (isSignedIn && role) {
-      if (role === 'patient') {
-        router.push('/patient');
-      } else if (role === 'driver') {
-        router.push('/driver');
-      } else {
-        router.push('/');
-      }
+   
+    if (isSignedIn) {
+      router.push('/patient');  
     }
-  }, [isSignedIn, role, router]);
+    
+  }, [isSignedIn, router]);
 
   return (
     <div>

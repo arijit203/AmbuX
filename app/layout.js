@@ -10,7 +10,6 @@ const inter = Inter({ subsets: ["latin"] });
 
 
 import './globals.css'
-import { RoleProvider } from "./context/RoleContext";
 
 
 export const metadata = {
@@ -25,10 +24,10 @@ export default function RootLayout({ children }) {
     <body 
         
       >
-         <RoleProvider>
+         
       <Toaster/>
         {children}
-        </RoleProvider>
+      
         </body>
     </html>
     </ClerkProvider>
