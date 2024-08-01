@@ -1,16 +1,13 @@
-import { Inter,Montserrat } from "next/font/google";
-import {
-  ClerkProvider
-} from '@clerk/nextjs'
-import './globals.css'
-import Header from './components/Header'
+import { Inter, Montserrat } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
+import "./globals.css";
+import Header from "./components/Header";
 import ToasterContext from "./context/ToasterContext";
 import { Toaster } from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
+import { DriverLocationProvider } from "./context/DriverLocationContext";
 
-
-import './globals.css'
-
+import "./globals.css";
 
 export const metadata = {
   title: "Create Next App",
@@ -20,16 +17,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-    <html lang="en">
-    <body 
-        
-      >
-         
-      <Toaster/>
-        {children}
-      
-        </body>
-    </html>
+      <DriverLocationProvider>
+        <html lang="en">
+          <body>
+            <Toaster />
+            {children}
+          </body>
+        </html>
+      </DriverLocationProvider>
     </ClerkProvider>
   );
 }

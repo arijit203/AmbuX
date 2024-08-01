@@ -1,5 +1,7 @@
 import { clerkMiddleware } from '@clerk/nextjs/server';
 
+import { NextResponse } from 'next/server';
+
 // Make sure that the `/api/webhooks/(.*)` route is not protected here
 export default clerkMiddleware({
     publicRoutes:["/api/webhooks/clerk","/sign-in","/sign-up"]
@@ -13,3 +15,5 @@ export const config = {
     '/(api|trpc)(.*)',
   ],
 };
+
+
