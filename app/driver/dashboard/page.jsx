@@ -77,6 +77,39 @@ function Page() {
     }
   };
 
+  // const updateDriverLocation = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       throw new Error("No token found");
+  //     }
+
+  //     const decodedToken = jwtDecode(token);
+  //     const driverId = decodedToken.driverId; // Adjust this according to how your token is structured
+
+  //     await axios.post("/api/driver/update-location", {
+  //       driverId,
+  //       location: driverLocation
+  //     });
+  //   } catch (error) {
+  //     console.error("Failed to update driver location:", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   // Example: Set initial driver location when the component mounts
+  //   setDriverLocation({ lat: 37.7749, lng: -122.4194 });
+
+  //   // Set up an interval to update driver location every 10 minutes
+  //   const intervalId = setInterval(() => {
+  //     updateDriverLocation();
+  //   }, 10 * 60 * 1000); // 10 minutes in milliseconds
+
+  //   // Cleanup function to clear the interval
+  //   return () => {
+  //     clearInterval(intervalId);
+  //   };
+  // }, [setDriverLocation, driverLocation]);
   return (
     <div className="flex flex-col min-h-screen p-5">
       <header className="bg-background px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
@@ -92,7 +125,6 @@ function Page() {
               <DropdownMenuItem>
                 <a
                   className="flex items-center gap-2"
-                  prefetch={false}
                   onClick={() => router.push("/profile")}
                 >
                   <UserIcon className="h-4 w-4" />
@@ -101,11 +133,7 @@ function Page() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <a
-                  className="flex items-center gap-2"
-                  prefetch={false}
-                  onClick={handleLogout}
-                >
+                <a className="flex items-center gap-2" onClick={handleLogout}>
                   <LogOutIcon className="h-4 w-4" />
                   <span>Logout</span>
                 </a>

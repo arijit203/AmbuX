@@ -9,9 +9,20 @@ export async function POST(req) {
   //   const driverId = "YOUR_DRIVER_ID"; // Retrieve the driver ID from session or authentication context
 
   try {
-    await Driver.findByIdAndUpdate(driverId, { curr_location: location });
+    console.log("Update Driver Location is called", location);
+
+    const updatedLocation = {
+      ...location,
+      updated_at: Date.now(),
+    };
+    const result = await Driver.findByIdAndUpdate(
+      driverId,
+      { curr_location: updatedLocation },
+      { new: true }
+    );
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
+    console.log("error", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 400 }

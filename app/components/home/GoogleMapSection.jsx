@@ -10,11 +10,13 @@ import {
 } from "@react-google-maps/api";
 import { SourceContext } from "../../context/SourceContext";
 import { DestinationContext } from "../../context/DestinationContext";
+import axios from "axios";
 
 function GoogleMapSearch() {
   const { source, setSource } = useContext(SourceContext);
   const { destination, setDestination } = useContext(DestinationContext);
   const [distance, setDistance] = useState(null);
+  const [drivers, setDrivers] = useState([]);
 
   const containerStyle = {
     width: "100%",
@@ -28,6 +30,24 @@ function GoogleMapSearch() {
 
   const [map, setMap] = useState(null);
   const [directionRoutePoints, setDirectionRoutePoints] = useState(null);
+
+  useEffect(() => {
+    // Fetch driver data
+    const fetchDrivers = async () => {
+      try {
+        const response = await axios.get("/api/driver/available-drivers");
+        if (response.data.success) {
+          setDrivers(response.data.drivers);
+        } else {
+          console.error("Failed to fetch drivers:", response.data.error);
+        }
+      } catch (error) {
+        console.error("Failed to fetch drivers:", error);
+      }
+    };
+
+    fetchDrivers();
+  }, []);
 
   useEffect(() => {
     if (source && map) {
@@ -178,6 +198,24 @@ function GoogleMapSearch() {
             }}
           />
         )}
+
+        {/* Render driver markers */}
+        {drivers.map((driver) => (
+          <MarkerF
+            key={driver._id}
+            position={{
+              lat: driver.curr_location.lat,
+              lng: driver.curr_location.lng,
+            }}
+            icon={{
+              url: "/ambulance5.png", // Replace with the correct image path
+              scaledSize: {
+                width: 35,
+                height: 35,
+              },
+            }}
+          />
+        ))}
       </GoogleMap>
 
       {distance && (

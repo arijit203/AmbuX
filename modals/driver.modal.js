@@ -5,7 +5,13 @@ const DriverSchema = new mongoose.Schema({
   phone_no: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   address: { type: String },
-  curr_location: { type: String }, // Current location field added
+  curr_location: {
+    type: {
+      lat: { type: Number },
+      lng: { type: Number },
+      updated_at: { type: Date, default: Date.now },
+    },
+  },
   isOffline: { type: Boolean, default: false },
   password: { type: String, required: true },
   license_plate: { type: String, required: true },
