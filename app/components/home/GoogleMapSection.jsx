@@ -68,19 +68,6 @@ function GoogleMapSearch() {
   }, [source]);
 
   useEffect(() => {
-    // Calculate distance if source and destination are available
-    if (source && destination && google.maps && google.maps.geometry) {
-      const distInMeters =
-        google.maps.geometry.spherical.computeDistanceBetween(
-          new google.maps.LatLng(source.lat, source.lng),
-          new google.maps.LatLng(destination.lat, destination.lng)
-        );
-      const distInKilometers = distInMeters / 1000; // Convert meters to kilometers
-      setDistance(distInKilometers); // Convert kilometers to miles
-    }
-  }, [source, destination]);
-
-  useEffect(() => {
     if (destination && map) {
       setCenter({
         lat: destination.lat,
@@ -106,6 +93,9 @@ function GoogleMapSearch() {
         (result, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
             setDirectionRoutePoints(result);
+            const distanceInMeters = result.routes[0].legs[0].distance.value;
+            const distanceInKilometers = distanceInMeters / 1000;
+            setDistance(distanceInKilometers);
           } else {
             console.error("Error");
           }
@@ -137,60 +127,61 @@ function GoogleMapSearch() {
         onUnmount={() => setMap(null)}
         options={{ mapId: "dba0874f794e21c1" }}
       >
-        {source && (
-          <>
-            <MarkerF
-              position={{ lat: source.lat, lng: source.lng }}
-              // icon={{
-              //   url:svgMarker1,
-              //   scaledSize:{
-              //     width:35,
-              //     height:35
-              //   }
-              // }}
-            />
-            {source.label && (
-              <OverlayViewF
-                position={{ lat: source.lat, lng: source.lng }}
-                mapPaneName={OverlayViewF.OVERLAY_MOUSE_TARGET}
-              >
-                <div className="p-2 bg-white font-bold inline-block">
-                  <p className="text-black text-[14px]">{source.label}</p>
-                </div>
-              </OverlayViewF>
-            )}
-          </>
+        {!directionRoutePoints && source && (
+          // <>
+          <MarkerF
+            position={{ lat: source.lat, lng: source.lng }}
+            // icon={{
+            //   url: svgMarker1,
+            //   scaledSize: {
+            //     width: 35,
+            //     height: 35,
+            //   },
+            // }}
+          />
         )}
+        {source && source.label && (
+          <OverlayViewF
+            position={{ lat: source.lat, lng: source.lng }}
+            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+          >
+            <div className="p-2 bg-white font-bold inline-block">
+              <p className="text-black text-[14px]">{source.label}</p>
+            </div>
+          </OverlayViewF>
+        )}
+        {/* </> */}
 
-        {destination && (
-          <>
-            <MarkerF
-              position={{ lat: destination.lat, lng: destination.lng }}
-              // icon={{
-              //   url:svgMarker,
-              //   scaledSize:{
-              //     width:35,
-              //     height:35
-              //   }
-              // }}
-            />
-            {destination.label && (
-              <OverlayViewF
-                position={{ lat: destination.lat, lng: destination.lng }}
-                mapPaneName={OverlayViewF.OVERLAY_MOUSE_TARGET}
-              >
-                <div className="p-2 bg-white font-bold inline-block">
-                  <p className="text-black text-[14px]">{destination.label}</p>
-                </div>
-              </OverlayViewF>
-            )}
-          </>
+        {!directionRoutePoints && destination && (
+          // <>
+          <MarkerF
+            position={{ lat: destination.lat, lng: destination.lng }}
+            // icon={{
+            //   url: svgMarker,
+            //   scaledSize: {
+            //     width: 35,
+            //     height: 35,
+            //   },
+            // }}
+          />
         )}
+        {destination && destination.label && (
+          <OverlayViewF
+            position={{ lat: destination.lat, lng: destination.lng }}
+            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+          >
+            <div className="p-2 bg-white font-bold inline-block">
+              <p className="text-black text-[14px]">{destination.label}</p>
+            </div>
+          </OverlayViewF>
+        )}
+        {/* </> */}
 
         {directionRoutePoints && (
           <DirectionsRenderer
             directions={directionRoutePoints}
             options={{
+              suppressMarkers: false,
               polylineOptions: {
                 strokeColor: "#000",
                 strokeWeight: 5,

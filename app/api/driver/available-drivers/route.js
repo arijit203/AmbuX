@@ -8,6 +8,7 @@ export async function GET() {
 
   try {
     const drivers = await Driver.find({ isOffline: false });
+    console.log("No of drivers available: ", drivers.length);
     return NextResponse.json({ success: true, drivers }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
