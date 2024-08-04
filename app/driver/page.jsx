@@ -33,9 +33,10 @@ export default function Page() {
 
   useEffect(() => {
     const token = localStorage.getItem("token"); // Get token from localStorage
-
+    console.log("Found token");
     // If token is not present, redirect to login page
     if (token) {
+      console.log("Redirecting");
       router.push("/driver/dashboard");
     }
   }, [router]);
@@ -143,6 +144,7 @@ export default function Page() {
   };
   const handleLogin = async (e) => {
     e.preventDefault();
+    console.log("Login handler");
     try {
       const response = await fetch("/api/driver/login", {
         method: "POST",
@@ -154,6 +156,7 @@ export default function Page() {
           password: form.password,
         }),
       });
+      console.log("response in longin handler: ", response);
 
       if (response.ok) {
         const data = await response.json();
@@ -252,9 +255,9 @@ export default function Page() {
                       >
                         <path
                           stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
                           d="m1 1 4 4 4-4"
                         />
                       </svg>

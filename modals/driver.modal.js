@@ -15,7 +15,11 @@ const DriverSchema = new mongoose.Schema({
   isOffline: { type: Boolean, default: false },
   password: { type: String, required: true },
   license_plate: { type: String, required: true },
-  assigned: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to User model
+  assigned: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  }, // Reference to User model
 });
 
 const Driver = mongoose.models.Driver || mongoose.model("Driver", DriverSchema);

@@ -10,7 +10,7 @@ export async function POST(req) {
     await connect();
 
     // Find the closest available driver who is not offline
-    const drivers = await Driver.find({ isOffline: false });
+    const drivers = await Driver.find({ isOffline: false, assigned: null });
     const closestDriver = await findClosestDriver(drivers, source);
 
     if (closestDriver) {
@@ -29,6 +29,7 @@ export async function POST(req) {
       );
     }
   } catch (error) {
+    console.log("Error in allocateDriver: ", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
@@ -56,7 +57,7 @@ async function findClosestDriver(drivers, source) {
   });
 
   await Promise.all(distancePromises);
-
+  console.log(closestDriver.name, " ", minDistance);
   return closestDriver;
 }
 

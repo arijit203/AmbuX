@@ -8,18 +8,18 @@ export async function POST(req) {
   if (!phone_no) {
     return NextResponse({ error: "Phone number is required" }, { status: 400 });
   }
-  console.log("Got the req");
 
   try {
     // Establish a connection to the database
     await connect();
-    console.log("Got the req1");
-
     // Fetch the user from the database
     const user = await Driver.findOne({ phone_no: phone_no });
 
     if (user) {
-      return NextResponse.json({ exists: true, id: user._id }, { status: 200 });
+      return NextResponse.json(
+        { exists: true, id: user._id, driver: user },
+        { status: 200 }
+      );
     }
 
     return NextResponse.json({ exists: false }, { status: 200 });

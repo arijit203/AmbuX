@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   AvatarImage,
@@ -12,12 +12,10 @@ import {
   CardContent,
 } from "../../components/ui/card";
 import { Label } from "../../components/ui/label";
-
 import { Button } from "../../components/ui/button1";
 import Map from "../../components/home/DriverGoogleMap";
 import withAuth from "../../../withAuth";
 import { jwtDecode } from "jwt-decode"; // Correct import
-
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -26,7 +24,6 @@ import {
   DropdownMenuSeparator,
 } from "../../components/ui/dropdown-menu";
 import Link from "next/link";
-
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -49,14 +46,76 @@ const rides = [
   },
   // Add more ride objects here
 ];
-
 function Page() {
   const router = useRouter();
   const [expandedRideIndex, setExpandedRideIndex] = useState(null);
+  const [driver, setDriver] = useState(null);
+  const [initials, setInitials] = useState("");
+  const [notification, setNotification] = useState(null);
+  const [hasCheckedAssigned, setHasCheckedAssigned] = useState(false);
+  const [notificationSeen, setNotificationSeen] = useState(false); // New state
 
   const handleToggleExpand = (index) => {
     setExpandedRideIndex(expandedRideIndex === index ? null : index);
   };
+
+  useEffect(() => {
+    const fetchDriverDetails = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        const decodedToken = jwtDecode(token);
+        const driverId = decodedToken.driverId;
+
+        const response = await axios.get(`/api/driver/get-d/${driverId}`);
+        setDriver(response.data);
+
+        const driverNameInitials = response.data.name
+          .split(" ")
+          .map((part) => part[0])
+          .join("")
+          .toUpperCase();
+        setInitials(driverNameInitials);
+      } catch (error) {
+        console.error("Failed to fetch driver details:", error);
+      }
+    };
+
+    fetchDriverDetails();
+  }, []);
+
+  useEffect(() => {
+    const checkAssignedStatus = async () => {
+      console.log("notification seen:", notificationSeen);
+      if (!driver || hasCheckedAssigned) return; // Skip if notification has been seen
+
+      try {
+        const response = await axios.post("/api/driver/check-assigned", {
+          driverId: driver._id,
+        });
+
+        if (
+          response.data.success &&
+          response.data.assigned &&
+          !hasCheckedAssigned
+        ) {
+          setNotification(
+            `You have been assigned a new patient with ID: ${response.data.assigned}`
+          );
+          setHasCheckedAssigned(true);
+        }
+      } catch (error) {
+        console.error("Failed to check assigned status:", error);
+      }
+    };
+
+    const interval = setInterval(checkAssignedStatus, 10000);
+
+    return () => clearInterval(interval);
+  }, [driver, hasCheckedAssigned, notificationSeen]); // Add notificationSeen to dependencies
 
   const handleLogout = async () => {
     try {
@@ -66,7 +125,7 @@ function Page() {
       }
 
       const decodedToken = jwtDecode(token);
-      const driverId = decodedToken.driverId; // Adjust this according to how your token is structured
+      const driverId = decodedToken.driverId;
 
       await axios.post("/api/driver/logout", { driverId });
 
@@ -77,39 +136,6 @@ function Page() {
     }
   };
 
-  // const updateDriverLocation = async () => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     if (!token) {
-  //       throw new Error("No token found");
-  //     }
-
-  //     const decodedToken = jwtDecode(token);
-  //     const driverId = decodedToken.driverId; // Adjust this according to how your token is structured
-
-  //     await axios.post("/api/driver/update-location", {
-  //       driverId,
-  //       location: driverLocation
-  //     });
-  //   } catch (error) {
-  //     console.error("Failed to update driver location:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   // Example: Set initial driver location when the component mounts
-  //   setDriverLocation({ lat: 37.7749, lng: -122.4194 });
-
-  //   // Set up an interval to update driver location every 10 minutes
-  //   const intervalId = setInterval(() => {
-  //     updateDriverLocation();
-  //   }, 10 * 60 * 1000); // 10 minutes in milliseconds
-
-  //   // Cleanup function to clear the interval
-  //   return () => {
-  //     clearInterval(intervalId);
-  //   };
-  // }, [setDriverLocation, driverLocation]);
   return (
     <div className="flex flex-col min-h-screen p-5">
       <header className="bg-background px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
@@ -118,7 +144,7 @@ function Page() {
             <DropdownMenuTrigger asChild>
               <Avatar className="w-10 h-10 border cursor-pointer">
                 <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback>DJ</AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -142,36 +168,43 @@ function Page() {
           </DropdownMenu>
           <div>
             <h1 className="text-2xl font-bold">Driver Dashboard</h1>
-            <div className="flex items-center space-x-4">
-              <p className="text-muted-foreground">John Doe</p>
-              <p className="text-muted-foreground">License Plate: ABC123</p>
-            </div>
+            {driver ? (
+              <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                <p className="text-muted-foreground">{driver.name}</p>
+                <p className="text-muted-foreground">
+                  License Plate: {driver.license_plate}
+                </p>
+              </div>
+            ) : (
+              <p>Loading driver details...</p>
+            )}
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-xl font-bold">$250.00</p>
-            <p className="text-muted-foreground">Today's Earnings</p>
-          </div>
+        <div className="text-right mt-4 md:mt-0">
+          <p className="text-xl font-bold">$250.00</p>
+          <p className="text-muted-foreground">Today's Earnings</p>
         </div>
       </header>
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_900px] flex-1">
-        <div className="bg-background p-4 space-y-4 md:p-6 md:space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_900px] flex-1 gap-4">
+        <div className="bg-background p-4 md:p-6 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Previous Rides</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {rides.map((ride, index) => (
-                <div key={index} className="bg-white p-6 rounded-lg shadow-md">
-                  <div className="grid grid-cols-2 gap-4">
+                <div
+                  key={index}
+                  className="bg-white p-4 rounded-lg shadow-md w-full"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label>Pickup</Label>
                       <p className="font-medium">{ride.pickup}</p>
                     </div>
                     <div>
                       <Label>Dropoff</Label>
-                      <div className="flex justify-between font-medium">
+                      <div className="flex justify-between items-center font-medium">
                         {ride.dropoff}
                         <Button
                           variant="outline"
@@ -190,7 +223,7 @@ function Page() {
                   </div>
                   {expandedRideIndex === index && (
                     <CardContent className="grid p-0 gap-4 mt-2">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label>Distance</Label>
                           <p className="font-medium">{ride.distance}</p>
@@ -200,21 +233,19 @@ function Page() {
                           <p className="font-medium">{ride.fare}</p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label>Condition</Label>
                           <p className="font-medium">{ride.condition}</p>
                         </div>
                         <div>
                           <Label>Rating</Label>
-                          <div className="flex items-center gap-1">
-                            {ride.rating.map((star, i) => (
+                          <div className="flex items-center">
+                            {ride.rating.map((star, idx) => (
                               <StarIcon
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  star
-                                    ? "fill-primary"
-                                    : "text-muted-foreground"
+                                key={idx}
+                                className={`h-4 w-4 ${
+                                  star ? "text-yellow-400" : "text-gray-400"
                                 }`}
                               />
                             ))}
@@ -227,15 +258,38 @@ function Page() {
               ))}
             </CardContent>
           </Card>
-          <div className="flex justify-end">
-            <Button>Start New Ride</Button>
-          </div>
         </div>
-        <div className="bg-muted pr-5">
+        <div className="bg-background p-4 md:p-6">
           <Map />
         </div>
       </div>
+      {notification && (
+        <div className="fixed bottom-0 left-0 right-0 bg-red-600 text-white text-center p-4">
+          <p>{notification}</p>
+          <Button onClick={() => setNotification(null)}>OK</Button>
+        </div>
+      )}
     </div>
+  );
+}
+
+function UserIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
   );
 }
 
@@ -273,27 +327,7 @@ function ChevronDownIcon(props) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
-function UserIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
+      <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }

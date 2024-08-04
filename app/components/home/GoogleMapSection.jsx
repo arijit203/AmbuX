@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useContext, useEffect, useState } from "react";
 import {
   DirectionsRenderer,
@@ -20,7 +18,7 @@ function GoogleMapSearch() {
 
   const containerStyle = {
     width: "100%",
-    height: window.innerWidth * 0.45,
+    height: "100%", // Ensure map container height is set to 100%
   };
 
   const [center, setCenter] = useState({
@@ -118,17 +116,18 @@ function GoogleMapSearch() {
     </svg>`;
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "400px" }}>
+    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
+      {" "}
+      {/* Ensure parent div height is full viewport */}
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
         zoom={11}
         onLoad={(map) => setMap(map)}
-        onUnmount={() => setMap(null)}
+        onUnmount={onUnmount}
         options={{ mapId: "dba0874f794e21c1" }}
       >
         {!directionRoutePoints && source && (
-          // <>
           <MarkerF
             position={{ lat: source.lat, lng: source.lng }}
             // icon={{
@@ -150,10 +149,8 @@ function GoogleMapSearch() {
             </div>
           </OverlayViewF>
         )}
-        {/* </> */}
 
         {!directionRoutePoints && destination && (
-          // <>
           <MarkerF
             position={{ lat: destination.lat, lng: destination.lng }}
             // icon={{
@@ -175,7 +172,6 @@ function GoogleMapSearch() {
             </div>
           </OverlayViewF>
         )}
-        {/* </> */}
 
         {directionRoutePoints && (
           <DirectionsRenderer
@@ -190,7 +186,6 @@ function GoogleMapSearch() {
           />
         )}
 
-        {/* Render driver markers */}
         {drivers.map((driver) => (
           <MarkerF
             key={driver._id}
@@ -208,7 +203,6 @@ function GoogleMapSearch() {
           />
         ))}
       </GoogleMap>
-
       {distance && (
         <div
           style={{

@@ -6,6 +6,7 @@ import ToasterContext from "./context/ToasterContext";
 import { Toaster } from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
 import { DriverLocationProvider } from "./context/DriverLocationContext";
+// import { SocketProvider } from "./context/SocketContext";
 
 import "./globals.css";
 

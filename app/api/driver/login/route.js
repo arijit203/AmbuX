@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
+  console.log("Login route is called");
   const { email, password } = await req.json();
   console.log(email, " ", password);
   try {
