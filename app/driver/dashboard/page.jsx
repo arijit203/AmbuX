@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Avatar,
   AvatarImage,
@@ -26,8 +26,9 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { RideContext } from "../../context/RideContext";
 
-const rides = [
+const prevRides = [
   {
     pickup: "123 Main St, Anytown USA",
     dropoff: "456 Oak Rd, Anytown USA",
@@ -46,6 +47,7 @@ const rides = [
   },
   // Add more ride objects here
 ];
+
 function Page() {
   const router = useRouter();
   const [expandedRideIndex, setExpandedRideIndex] = useState(null);
@@ -54,6 +56,9 @@ function Page() {
   const [notification, setNotification] = useState(null);
   const [hasCheckedAssigned, setHasCheckedAssigned] = useState(false);
   const [notificationSeen, setNotificationSeen] = useState(false); // New state
+  const [incompleteRide, setIncompleteRide] = useState(null); // New state
+  const [pickupAddress, setPickupAddress] = useState("Fetching address...");
+  const [dropoffAddress, setDropoffAddress] = useState("Fetching address...");
 
   const handleToggleExpand = (index) => {
     setExpandedRideIndex(expandedRideIndex === index ? null : index);
@@ -89,7 +94,6 @@ function Page() {
 
   useEffect(() => {
     const checkAssignedStatus = async () => {
-      console.log("notification seen:", notificationSeen);
       if (!driver || hasCheckedAssigned) return; // Skip if notification has been seen
 
       try {
@@ -112,7 +116,7 @@ function Page() {
       }
     };
 
-    const interval = setInterval(checkAssignedStatus, 10000);
+    const interval = setInterval(checkAssignedStatus, 5000);
 
     return () => clearInterval(interval);
   }, [driver, hasCheckedAssigned, notificationSeen]); // Add notificationSeen to dependencies
@@ -136,140 +140,239 @@ function Page() {
     }
   };
 
+  const handleNotificationOk = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const decodedToken = jwtDecode(token);
+      const driverId = decodedToken.driverId;
+
+      const response = await axios.get(`/api/checkIncompleteRide/${driverId}`);
+      console.log("Response ontained: ", response);
+      if (response.data.hasIncompleteRide) {
+        console.log("Response.data:: ", response.data);
+        setIncompleteRide(response.data.ride);
+      }
+
+      setNotification(null);
+    } catch (error) {
+      console.error("Failed to check incomplete ride:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchAddress = async (lat, lng, setAddress) => {
+      try {
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}`
+        );
+        const data = await response.json();
+        if (data.status === "OK" && data.results[0]) {
+          setAddress(data.results[0].formatted_address);
+        } else {
+          setAddress("Address not found");
+        }
+      } catch (error) {
+        console.error("Error fetching address", error);
+        setAddress("Error fetching address");
+      }
+    };
+
+    if (incompleteRide) {
+      const { source, dest } = incompleteRide;
+      if (source) {
+        fetchAddress(source.lat, source.lng, setPickupAddress);
+      }
+      if (dest) {
+        fetchAddress(dest.lat, dest.lng, setDropoffAddress);
+      }
+    }
+  }, [incompleteRide]);
+
   return (
-    <div className="flex flex-col min-h-screen p-5">
-      <header className="bg-background px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
-        <div className="flex items-center gap-5">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="w-10 h-10 border cursor-pointer">
-                <AvatarImage src="/placeholder-user.jpg" />
-                <AvatarFallback>{initials}</AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <a
-                  className="flex items-center gap-2"
-                  onClick={() => router.push("/profile")}
-                >
-                  <UserIcon className="h-4 w-4" />
-                  <span>Profile</span>
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <a className="flex items-center gap-2" onClick={handleLogout}>
-                  <LogOutIcon className="h-4 w-4" />
-                  <span>Logout</span>
-                </a>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div>
-            <h1 className="text-2xl font-bold">Driver Dashboard</h1>
-            {driver ? (
-              <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
-                <p className="text-muted-foreground">{driver.name}</p>
-                <p className="text-muted-foreground">
-                  License Plate: {driver.license_plate}
-                </p>
-              </div>
-            ) : (
-              <p>Loading driver details...</p>
-            )}
+    <>
+      <div className="flex flex-col min-h-screen p-5">
+        <header className="bg-background px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="w-10 h-10 border cursor-pointer">
+                  <AvatarImage src="/placeholder-user.jpg" />
+                  <AvatarFallback>{initials}</AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <a
+                    className="flex items-center gap-2"
+                    onClick={() => router.push("/profile")}
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    <span>Profile</span>
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <a className="flex items-center gap-2" onClick={handleLogout}>
+                    <LogOutIcon className="h-4 w-4" />
+                    <span>Logout</span>
+                  </a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div>
+              <h1 className="text-2xl font-bold">Driver Dashboard</h1>
+              {driver ? (
+                <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                  <p className="text-muted-foreground">{driver.name}</p>
+                  <p className="text-muted-foreground">
+                    License Plate: {driver.license_plate}
+                  </p>
+                </div>
+              ) : (
+                <p>Loading driver details...</p>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="text-right mt-4 md:mt-0">
-          <p className="text-xl font-bold">$250.00</p>
-          <p className="text-muted-foreground">Today's Earnings</p>
-        </div>
-      </header>
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_900px] flex-1 gap-4">
-        <div className="bg-background p-4 md:p-6 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Previous Rides</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {rides.map((ride, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-4 rounded-lg shadow-md w-full"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Pickup</Label>
-                      <p className="font-medium">{ride.pickup}</p>
-                    </div>
-                    <div>
-                      <Label>Dropoff</Label>
-                      <div className="flex justify-between items-center font-medium">
-                        {ride.dropoff}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="ml-auto"
-                          onClick={() => handleToggleExpand(index)}
-                        >
-                          <ChevronDownIcon
-                            className={`w-4 h-4 transition-transform ${
-                              expandedRideIndex === index ? "rotate-180" : ""
-                            }`}
-                          />
-                        </Button>
+          <div className="text-right mt-4 md:mt-0">
+            <p className="text-xl font-bold">$250.00</p>
+            <p className="text-muted-foreground">Today's Earnings</p>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_900px] flex-1 gap-4">
+          <div className="bg-background p-4 md:p-6 space-y-4">
+            {incompleteRide && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Ride</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-white p-4 rounded-lg shadow-md w-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Pickup</Label>
+                        <p className="font-medium">{pickupAddress}</p>
+                      </div>
+                      <div>
+                        <Label>Dropoff</Label>
+                        <p className="font-medium">{dropoffAddress}</p>
+                      </div>
+                      {incompleteRide.patient_name && (
+                        <div>
+                          <Label>Patient Name</Label>
+                          <p className="font-medium">
+                            {incompleteRide.patient_name}
+                          </p>
+                        </div>
+                      )}
+                      {incompleteRide.patient_ph && (
+                        <div>
+                          <Label>Patient Phone</Label>
+                          <p className="font-medium">
+                            {incompleteRide.patient_ph}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <Label>Condition</Label>
+                        <p className="font-medium">
+                          {incompleteRide.condition}
+                        </p>
                       </div>
                     </div>
+                    {/* Additional details for the current ride can go here */}
                   </div>
-                  {expandedRideIndex === index && (
-                    <CardContent className="grid p-0 gap-4 mt-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label>Distance</Label>
-                          <p className="font-medium">{ride.distance}</p>
-                        </div>
-                        <div>
-                          <Label>Fare</Label>
-                          <p className="font-medium">{ride.fare}</p>
+                </CardContent>
+              </Card>
+            )}
+            <Card>
+              <CardHeader>
+                <CardTitle>Previous Rides</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {prevRides.map((ride, index) => (
+                  <div
+                    key={index}
+                    className="bg-white p-4 rounded-lg shadow-md w-full"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Pickup</Label>
+                        <p className="font-medium">{ride.pickup}</p>
+                      </div>
+                      <div>
+                        <Label>Dropoff</Label>
+                        <div className="flex justify-between items-center font-medium">
+                          {ride.dropoff}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-auto"
+                            onClick={() => handleToggleExpand(index)}
+                          >
+                            <ChevronDownIcon
+                              className={`w-4 h-4 transition-transform ${
+                                expandedRideIndex === index ? "rotate-180" : ""
+                              }`}
+                            />
+                          </Button>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label>Condition</Label>
-                          <p className="font-medium">{ride.condition}</p>
-                        </div>
-                        <div>
-                          <Label>Rating</Label>
-                          <div className="flex items-center">
-                            {ride.rating.map((star, idx) => (
-                              <StarIcon
-                                key={idx}
-                                className={`h-4 w-4 ${
-                                  star ? "text-yellow-400" : "text-gray-400"
-                                }`}
-                              />
-                            ))}
+                    </div>
+                    {expandedRideIndex === index && (
+                      <CardContent className="grid p-0 gap-4 mt-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Distance</Label>
+                            <p className="font-medium">{ride.distance}</p>
+                          </div>
+                          <div>
+                            <Label>Fare</Label>
+                            <p className="font-medium">{ride.fare}</p>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Condition</Label>
+                            <p className="font-medium">{ride.condition}</p>
+                          </div>
+                          <div>
+                            <Label>Rating</Label>
+                            <div className="flex items-center">
+                              {ride.rating.map((star, idx) => (
+                                <StarIcon
+                                  key={idx}
+                                  className={`h-4 w-4 ${
+                                    star ? "text-yellow-400" : "text-gray-400"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+          <div className="bg-background p-4 md:p-6">
+            <Map incompleteRide={incompleteRide} />
+          </div>
         </div>
-        <div className="bg-background p-4 md:p-6">
-          <Map />
-        </div>
+        {notification && (
+          <div className="fixed bottom-0 left-0 right-0 bg-red-600 text-white text-center p-4">
+            <p>{notification}</p>
+            <Button onClick={handleNotificationOk}>OK</Button>
+          </div>
+        )}
       </div>
-      {notification && (
-        <div className="fixed bottom-0 left-0 right-0 bg-red-600 text-white text-center p-4">
-          <p>{notification}</p>
-          <Button onClick={() => setNotification(null)}>OK</Button>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 

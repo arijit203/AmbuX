@@ -14,6 +14,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Button } from "../components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
 import OtpPopup from "../components/OtpPopup";
+import Link from "next/link";
 
 export default function Page() {
   const router = useRouter();
@@ -178,6 +179,14 @@ export default function Page() {
     <div className="grid md:grid-cols-2 min-h-[100dvh] w-full">
       <div className="flex flex-col items-center justify-center bg-primary p-6 md:p-10">
         <div className="max-w-md space-y-4">
+          <Link
+            href="/"
+            className="absolute top-4 left-4 inline-flex h-10 items-center justify-center rounded-md bg-primary-foreground px-4 py-2 text-sm font-medium text-primary shadow transition-colors hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            prefetch={false}
+          >
+            <ArrowLeftIcon className="w-5 h-5 mr-2" />
+            Back
+          </Link>
           <h1 className="text-3xl font-bold text-primary-foreground">
             Welcome Ambulance Driver
           </h1>
@@ -372,5 +381,25 @@ export default function Page() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ArrowLeftIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m12 19-7-7 7-7" />
+      <path d="M19 12H5" />
+    </svg>
   );
 }

@@ -21,27 +21,50 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-dvh">
-      <header className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 bg-background border-b">
+      <header className="flex dark items-center justify-between px-4 py-3 md:px-6 md:py-4 bg-background border-b">
         <div className="flex items-center gap-4">
           <AmbulanceIcon className="w-8 h-8 text-primary" />
-          <span className="text-lg font-semibold">AmbuX Ambulance</span>
+          <span className="text-xl font-semibold">
+            <span className="text-white">Ambu</span>
+            <span className="text-red-600 pr-">X </span>
+            <span className="text-white"> Ambulances</span>
+          </span>
         </div>
         <div className="flex items-center gap-4">
-          <UserIcon
-            className="w-6 h-6 text-muted-foreground"
+          {/* Box for Patient Icon */}
+          <div
+            className="flex items-center gap-2 bg-gray-100 p-3 rounded-lg shadow-md cursor-pointer"
             onClick={() => handleRoleClick("patient")}
-          />
-          <TruckIcon
-            className="w-6 h-6 text-muted-foreground"
-            onClick={() => handleRoleClick("driver")}
-          />
+          >
+            <div className="dark flex items-center justify-center w-3 h-2 bg-primary rounded-full text-white">
+              <img src="/profile.png" alt="Patient Icon" className="w-5 h-5" />{" "}
+              {/* Replace PatientIcon with your actual icon component */}
+            </div>
+            <span className="text-lg font-medium">Patient</span>
+          </div>
+
+          {/* Box for Driver Icon */}
+          <div
+            className="flex items-center gap-2 bg-gray-100 p-3 rounded-lg shadow-md cursor-pointer"
+            onClick={() => handleRoleClick("Driver")}
+          >
+            <div className="flex items-center justify-center w-7 h-2 bg-primary rounded-full text-white">
+              <img
+                src="/ambulance-64.png"
+                alt="Patient Icon"
+                className="w-64 h-10"
+              />{" "}
+              {/* Replace DriverIcon with your actual icon component */}
+            </div>
+            <span className="text-lg font-medium">Driver</span>
+          </div>
         </div>
       </header>
       <main className="flex-1">
         <section className="dark w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-primary to-primary-foreground">
-          <div className="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-10">
-            <div className="space-y-4">
-              <h1 className="text-3xl font-bold tracking-tighter text-primary-foreground sm:text-4xl md:text-5xl xl:text-[3.4rem] 2xl:text-[3.75rem]">
+          <div className="container grid items-center gap-6 px-4 md:px-10 lg:grid-cols-2 lg:gap-10 ">
+            <div className="space-y-4 ">
+              <h1 className="text-1xl font-bold tracking-tighter text-primary-foreground sm:text-4xl md:text-5xl xl:text-[3.4rem] 2xl:text-[3.75rem]">
                 Reliable Ambulance Services
               </h1>
               <p className="max-w-[600px] text-primary-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -49,17 +72,17 @@ export default function HomePage() {
                 prompt and efficient emergency medical transportation services
                 to those in need.
               </p>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
+              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
                 <Link
                   href="#"
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-primary-foreground px-8 text-sm font-medium text-primary shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                  className="inline-flex h-12 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent"
                   prefetch={false}
                 >
                   Contact Us
                 </Link>
                 <Link
                   href="#"
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                  className="inline-flex h-12 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent"
                   prefetch={false}
                 >
                   Learn More
@@ -68,7 +91,7 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col items-start space-y-4">
               <img
-                src="/placeholder.svg"
+                src="/Ambulance6.png"
                 width="550"
                 height="550"
                 alt="Ambulance"
@@ -147,29 +170,29 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted pl-20 dark bg-gradient-to-r from-primary to-primary-foreground">
           <div className="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-10">
             <div className="space-y-2">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                 Contact Us for Reliable Ambulance Services
               </h2>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="max-w-[600px] text-gray-700 text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 Our team is available 24/7 to provide emergency medical
                 transportation and non-emergency patient transport services. Get
                 in touch with us today to learn more.
               </p>
             </div>
-            <div className="flex flex-col gap-4 lg:justify-end">
+            <div className="flex flex-col justify-center gap-4 lg:justify-end">
               <Link
                 href="#"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                className="inline-flex h-10 w-[50%] items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 prefetch={false}
               >
                 Call Now
               </Link>
               <Link
                 href="#"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                className="inline-flex h-10 w-[50%] items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 prefetch={false}
               >
                 Request a Callback
@@ -305,29 +328,6 @@ function StretchVerticalIcon(props) {
   );
 }
 
-function TruckIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-      <path d="M15 18H9" />
-      <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
-      <circle cx="17" cy="18" r="2" />
-      <circle cx="7" cy="18" r="2" />
-    </svg>
-  );
-}
-
 function UserIcon(props) {
   return (
     <svg
@@ -348,6 +348,18 @@ function UserIcon(props) {
   );
 }
 
+const CircularIconWrapper = ({
+  children,
+  size = "w-12 h-12",
+  bgColor = "bg-black",
+}) => (
+  <div
+    className={`flex items-center justify-center ${size} ${bgColor} rounded-full`}
+  >
+    {children}
+  </div>
+);
+
 function XIcon(props) {
   return (
     <svg
@@ -364,6 +376,29 @@ function XIcon(props) {
     >
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+function TruckIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+      <path d="M15 18H9" />
+      <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+      <circle cx="17" cy="18" r="2" />
+      <circle cx="7" cy="18" r="2" />
     </svg>
   );
 }

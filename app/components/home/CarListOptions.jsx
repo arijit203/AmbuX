@@ -2,38 +2,66 @@ import React, { useContext, useState } from "react";
 import { CarListData } from "../../../utils/CarListData";
 import CarListItem from "./CarListItem";
 import { SourceContext } from "../../context/SourceContext";
+
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
+import { DestinationContext } from "../../context/DestinationContext";
+import { useRouter } from "next/navigation";
+import { RideContext } from "../../context/RideContext";
+
 // import ambulanceGif from "./Ambulancegif.gif"; // Adjust the path as necessary
 
 function CarListOptions({ distance }) {
   const [activeIndex, setActiveIndex] = useState(null);
   const [showGif, setShowGif] = useState(false);
+  const router = useRouter();
 
   const isButtonDisabled = activeIndex === null;
   const { user } = useUser();
   const { source } = useContext(SourceContext);
+  const { destination } = useContext(DestinationContext);
+  const { ride, setRide } = useContext(RideContext);
 
   const handleRequestAmbulance = async () => {
     setShowGif(true);
     try {
       const resp = await fetch(`/api/get-user/${user.id}`);
-      console.log(resp, "  source:", source);
+
       if (!resp.ok) {
         throw new Error("Failed to fetch user data");
       }
       const data = await resp.json();
-      console.log(data._id);
 
       const patientId = data._id;
 
       const response = await axios.post("/api/driver/allocate-drivers", {
         source,
         patientId,
+        source,
+        destination,
+        patientName: data.first_name || null,
+        ambu: CarListData[activeIndex].name,
+        patient_ph: data.phone_no,
       });
       console.log("response", response);
       if (response.data.success) {
-        console.log("Driver allocated successfully:", response.data.driver);
+        console.log("Driver allocated successfully:", ride);
+        const obj = response.data.obj;
+        const driverId = obj.driver_id;
+        const resp = await axios.get(`/api/driver/get-d/${driverId}`);
+        console.log("resp: ", resp);
+        const newRide = {
+          driver_name: obj.driver_name,
+          ambu_initial_loc: obj.ambu_initial_loc,
+          ambu: obj.type_ambu,
+          driver_phone: resp.data.phone_no,
+          license_plate: resp.data.license_plate,
+          source,
+          destination,
+        };
+        setRide(newRide);
+        localStorage.setItem("ride", JSON.stringify(newRide));
+        console.log("Driver allocated successfully:", ride);
         // Implement the logic to handle driver acceptance here
       } else {
         console.error("Failed to allocate driver:", response.data.error);

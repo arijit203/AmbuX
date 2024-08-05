@@ -12,6 +12,7 @@ export async function POST(req) {
     const driver = await Driver.findById(driverId);
 
     if (driver) {
+      console.log("Driver assigned:", driver);
       return NextResponse.json(
         { success: true, assigned: driver.assigned },
         { status: 200 }

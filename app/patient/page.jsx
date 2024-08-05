@@ -10,6 +10,7 @@ import GoogleMapSection from "../components/home/GoogleMapSection";
 import { SourceContext } from "../context/SourceContext";
 import { DestinationContext } from "../context/DestinationContext";
 import PhoneNumberPopup from "../components/PhoneNumberPopup";
+import { RideContext } from "../context/RideContext";
 
 export default function Home() {
   const [source, setSource] = useState([]);
@@ -19,6 +20,7 @@ export default function Home() {
   const { user } = useUser();
   const router = useRouter();
   const [distance, setDistance] = useState(null);
+  const [ride, setRide] = useState([]);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -71,19 +73,21 @@ export default function Home() {
       <Header />
       <SourceContext.Provider value={{ source, setSource }}>
         <DestinationContext.Provider value={{ destination, setDestination }}>
-          <LoadScript
-            libraries={["places"]}
-            googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
-          >
-            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div>
-                <SearchSection />
+          <RideContext.Provider value={{ ride, setRide }}>
+            <LoadScript
+              libraries={["places"]}
+              googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY}
+            >
+              <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div>
+                  <SearchSection />
+                </div>
+                <div className="col-span-2">
+                  <GoogleMapSection />
+                </div>
               </div>
-              <div className="col-span-2">
-                <GoogleMapSection />
-              </div>
-            </div>
-          </LoadScript>
+            </LoadScript>
+          </RideContext.Provider>
         </DestinationContext.Provider>
       </SourceContext.Provider>
     </>

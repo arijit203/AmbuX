@@ -15,21 +15,29 @@ function GoogleMapSearch() {
   const { destination, setDestination } = useContext(DestinationContext);
   const [distance, setDistance] = useState(null);
   const [drivers, setDrivers] = useState([]);
+  const [center, setCenter] = useState({ lat: -3.745, lng: -38.523 });
+  const [map, setMap] = useState(null);
+  const [directionRoutePoints, setDirectionRoutePoints] = useState(null);
+  const [routeFromAmbulanceToSource, setRouteFromAmbulanceToSource] =
+    useState(null);
+  const [ambulanceInitialLocation, setAmbulanceInitialLocation] =
+    useState(null);
 
   const containerStyle = {
     width: "100%",
-    height: "100%", // Ensure map container height is set to 100%
+    height: "100%",
   };
 
-  const [center, setCenter] = useState({
-    lat: -3.745,
-    lng: -38.523,
-  });
-
-  const [map, setMap] = useState(null);
-  const [directionRoutePoints, setDirectionRoutePoints] = useState(null);
-
   useEffect(() => {
+    // Extract data from localStorage
+    const ride = JSON.parse(localStorage.getItem("ride"));
+    if (ride) {
+      const { source, destination, ambu_initial_loc } = ride;
+      if (source) setSource(source);
+      if (destination) setDestination(destination);
+      if (ambu_initial_loc) setAmbulanceInitialLocation(ambu_initial_loc);
+    }
+
     // Fetch driver data
     const fetchDrivers = async () => {
       try {
@@ -45,32 +53,18 @@ function GoogleMapSearch() {
     };
 
     fetchDrivers();
-  }, []);
+  }, [setSource, setDestination]);
 
   useEffect(() => {
-    if (source && map) {
-      map.panTo({
-        lat: source.lat,
-        lng: source.lng,
-      });
-      setCenter({
-        lat: source.lat,
-        lng: source.lng,
-      });
+    if (source && source.length != 0 && map) {
+      map.panTo({ lat: source.lat, lng: source.lng });
+      setCenter({ lat: source.lat, lng: source.lng });
     }
-    if (source && destination) {
-      directionRoute();
-    } else {
-      setDirectionRoutePoints(null);
-    }
-  }, [source]);
+  }, [source, map]);
 
   useEffect(() => {
     if (destination && map) {
-      setCenter({
-        lat: destination.lat,
-        lng: destination.lng,
-      });
+      setCenter({ lat: destination.lat, lng: destination.lng });
     }
     if (source && destination) {
       directionRoute();
@@ -78,6 +72,12 @@ function GoogleMapSearch() {
       setDirectionRoutePoints(null);
     }
   }, [destination]);
+
+  useEffect(() => {
+    if (ambulanceInitialLocation && source) {
+      directionRouteFromAmbulanceToSource();
+    }
+  }, [ambulanceInitialLocation, source]);
 
   const directionRoute = () => {
     if (source && destination) {
@@ -95,7 +95,33 @@ function GoogleMapSearch() {
             const distanceInKilometers = distanceInMeters / 1000;
             setDistance(distanceInKilometers);
           } else {
-            console.error("Error");
+            console.error("Error fetching directions:", status);
+          }
+        }
+      );
+    }
+  };
+
+  const directionRouteFromAmbulanceToSource = () => {
+    if (ambulanceInitialLocation && source) {
+      const DirectionsService = new google.maps.DirectionsService();
+      DirectionsService.route(
+        {
+          origin: {
+            lat: ambulanceInitialLocation.lat,
+            lng: ambulanceInitialLocation.lng,
+          },
+          destination: { lat: source.lat, lng: source.lng },
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK) {
+            setRouteFromAmbulanceToSource(result);
+            const distanceInMeters = result.routes[0].legs[0].distance.value;
+            const distanceInKilometers = distanceInMeters / 1000;
+            setDistance(distanceInKilometers);
+          } else {
+            console.error("Error fetching directions:", status);
           }
         }
       );
@@ -106,19 +132,20 @@ function GoogleMapSearch() {
     setMap(null);
   }, []);
 
-  const svgMarker = `data:image/svg+xml;charset=UTF-8,
+  const svgMarkerA = `data:image/svg+xml;charset=UTF-8,
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M14 10h-4v4h4v-4ZM7 7v10h10V7H7Z" fill="black"/>
+      <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="white"/>
+      <text x="12" y="16" font-size="14" text-anchor="middle" fill="black">A</text>
     </svg>`;
-  const svgMarker1 = `data:image/svg+xml;charset=UTF-8,
+
+  const svgMarkerB = `data:image/svg+xml;charset=UTF-8,
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm5-2a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z" fill="black"/>
+      <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="white"/>
+      <text x="12" y="16" font-size="14" text-anchor="middle" fill="black">B</text>
     </svg>`;
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100vh" }}>
-      {" "}
-      {/* Ensure parent div height is full viewport */}
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
@@ -128,17 +155,9 @@ function GoogleMapSearch() {
         options={{ mapId: "dba0874f794e21c1" }}
       >
         {!directionRoutePoints && source && (
-          <MarkerF
-            position={{ lat: source.lat, lng: source.lng }}
-            // icon={{
-            //   url: svgMarker1,
-            //   scaledSize: {
-            //     width: 35,
-            //     height: 35,
-            //   },
-            // }}
-          />
+          <MarkerF position={{ lat: source.lat, lng: source.lng }} />
         )}
+        {/* {source && <MarkerF position={{ lat: source.lat, lng: source.lng }} />} */}
         {source && source.label && (
           <OverlayViewF
             position={{ lat: source.lat, lng: source.lng }}
@@ -151,16 +170,7 @@ function GoogleMapSearch() {
         )}
 
         {!directionRoutePoints && destination && (
-          <MarkerF
-            position={{ lat: destination.lat, lng: destination.lng }}
-            // icon={{
-            //   url: svgMarker,
-            //   scaledSize: {
-            //     width: 35,
-            //     height: 35,
-            //   },
-            // }}
-          />
+          <MarkerF position={{ lat: destination.lat, lng: destination.lng }} />
         )}
         {destination && destination.label && (
           <OverlayViewF
@@ -179,29 +189,51 @@ function GoogleMapSearch() {
             options={{
               suppressMarkers: false,
               polylineOptions: {
-                strokeColor: "#000",
+                strokeColor: "#000", // Black color for the route from source to destination
                 strokeWeight: 5,
               },
             }}
           />
         )}
 
-        {drivers.map((driver) => (
-          <MarkerF
-            key={driver._id}
-            position={{
-              lat: driver.curr_location.lat,
-              lng: driver.curr_location.lng,
-            }}
-            icon={{
-              url: "/ambulance5.png", // Replace with the correct image path
-              scaledSize: {
-                width: 35,
-                height: 35,
+        {routeFromAmbulanceToSource && (
+          <DirectionsRenderer
+            directions={routeFromAmbulanceToSource}
+            options={{
+              suppressMarkers: true,
+              polylineOptions: {
+                strokeColor: "#00f", // Blue color for the route from ambulance initial location to source
+                strokeWeight: 5,
               },
             }}
           />
-        ))}
+        )}
+        {routeFromAmbulanceToSource ? (
+          <MarkerF
+            position={{
+              lat: ambulanceInitialLocation.lat,
+              lng: ambulanceInitialLocation.lng,
+            }}
+            icon={{
+              url: "/Ambulance5.png",
+              scaledSize: { width: 35, height: 35 },
+            }}
+          />
+        ) : (
+          drivers.map((driver) => (
+            <MarkerF
+              key={driver._id}
+              position={{
+                lat: driver.curr_location.lat,
+                lng: driver.curr_location.lng,
+              }}
+              icon={{
+                url: "/Ambulance5.png",
+                scaledSize: { width: 35, height: 35 },
+              }}
+            />
+          ))
+        )}
       </GoogleMap>
       {distance && (
         <div
