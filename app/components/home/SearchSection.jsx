@@ -104,7 +104,7 @@ function SearchSection() {
             <button
               className={`p-3 w-full mt-5 rounded-lg bg-black text-white`}
               onClick={handleButtonClick}
-              disabled={isButtonDisabled}
+              // disabled={isButtonDisabled}
             >
               Search
             </button>

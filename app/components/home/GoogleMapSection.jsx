@@ -14,6 +14,7 @@ function GoogleMapSearch() {
   const { source, setSource } = useContext(SourceContext);
   const { destination, setDestination } = useContext(DestinationContext);
   const [distance, setDistance] = useState(null);
+  const [nearestAmbulance, setNearestAmbulance] = useState(null);
   const [drivers, setDrivers] = useState([]);
   const [center, setCenter] = useState({ lat: -3.745, lng: -38.523 });
   const [map, setMap] = useState(null);
@@ -54,6 +55,30 @@ function GoogleMapSearch() {
 
     fetchDrivers();
   }, [setSource, setDestination]);
+
+  useEffect(() => {
+    const findNearestAmbulance = async () => {
+      try {
+        const response = await axios.post("/api/driver/nearest-ambulance", {
+          source,
+        });
+        if (response.data.success) {
+          setNearestAmbulance(response.data.minDistance);
+          console.log("Nearest ambulance:", response.data.minDistance);
+          // Perform actions with the nearest ambulance data
+        } else {
+          console.error(
+            "Failed to find nearest ambulance:",
+            response.data.error
+          );
+        }
+      } catch (error) {
+        console.error("Error finding nearest ambulance:", error);
+      }
+    };
+
+    findNearestAmbulance();
+  }, [distance, source]);
 
   useEffect(() => {
     if (source && source.length != 0 && map) {
@@ -235,12 +260,31 @@ function GoogleMapSearch() {
           ))
         )}
       </GoogleMap>
-      {distance && (
+      {nearestAmbulance && (
         <div
           style={{
             position: "absolute",
             top: "10px",
             right: "10px",
+            backgroundColor: "white",
+            border: "1px solid gray",
+            borderRadius: "5px",
+            padding: "10px",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+            zIndex: 1,
+          }}
+        >
+          <p style={{ margin: 0, fontWeight: "bold", fontSize: "16px" }}>
+            Nearest Ambulance At : {nearestAmbulance.toFixed(2)} Km
+          </p>
+        </div>
+      )}
+      {distance && (
+        <div
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "300px",
             backgroundColor: "white",
             border: "1px solid gray",
             borderRadius: "5px",

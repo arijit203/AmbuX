@@ -30,18 +30,18 @@ import { RideContext } from "../../context/RideContext";
 
 const prevRides = [
   {
-    pickup: "123 Main St, Anytown USA",
-    dropoff: "456 Oak Rd, Anytown USA",
-    distance: "12 miles",
-    fare: "$45.00",
+    pickup: "Ruby Crossing,Kol-700107",
+    dropoff: "National Medical College,kol-700014",
+    distance: "7 Km",
+    fare: "₹45.00",
     rating: [true, true, true, true, false],
-    condition: "Good",
+    condition: "Critical Condition",
   },
   {
-    pickup: "789 Elm St, Anytown USA",
-    dropoff: "321 Pine Rd, Anytown USA",
-    distance: "8 miles",
-    fare: "$32.00",
+    pickup: "Explande Dorina Crossing",
+    dropoff: "NRS Medical College",
+    distance: "3Km",
+    fare: "₹32.00",
     rating: [true, true, true, false, false],
     condition: "Fair",
   },
@@ -238,7 +238,7 @@ function Page() {
             </div>
           </div>
           <div className="text-right mt-4 md:mt-0">
-            <p className="text-xl font-bold">$250.00</p>
+            <p className="text-xl font-bold">₹250.00</p>
             <p className="text-muted-foreground">Today's Earnings</p>
           </div>
         </header>

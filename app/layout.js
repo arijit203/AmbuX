@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import ToasterContext from "./context/ToasterContext";
 import { Toaster } from "react-hot-toast";
+
 const inter = Inter({ subsets: ["latin"] });
 import { DriverLocationProvider } from "./context/DriverLocationContext";
 // import { SocketProvider } from "./context/SocketContext";
@@ -21,7 +22,8 @@ export default function RootLayout({ children }) {
       <DriverLocationProvider>
         <html lang="en">
           <body>
-            <Toaster />
+            <ToasterContext />
+
             {children}
           </body>
         </html>
