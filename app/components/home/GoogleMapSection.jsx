@@ -260,7 +260,7 @@ function GoogleMapSearch() {
           ))
         )}
       </GoogleMap>
-      {nearestAmbulance && (
+      {!ambulanceInitialLocation && nearestAmbulance && (
         <div
           style={{
             position: "absolute",
@@ -284,7 +284,7 @@ function GoogleMapSearch() {
           style={{
             position: "absolute",
             top: "10px",
-            right: "300px",
+            right: ambulanceInitialLocation ? "10px" : "300px",
             backgroundColor: "white",
             border: "1px solid gray",
             borderRadius: "5px",
